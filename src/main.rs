@@ -10,6 +10,11 @@ use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
 
 use std::collections::LinkedList;
+use rand::Rng;
+
+const SNAKE_SIZE: u32  = 15;
+const WINDOW_WIDTH:  u32 = 800;
+const WINDOW_HEIGHT: u32 = 600;
 
 #[derive(Clone, PartialEq)]
 enum Direction {
@@ -20,8 +25,9 @@ enum Direction {
 }
 
 struct Game {
-    gl: GlGraphics, // OpenGL drawing backend.  
-    snake: Snake
+    gl: GlGraphics,     // OpenGL drawing backend.  
+    snake: Snake,       // Snake object
+    food: Food          // Food object
 }
 
 impl Game  {
@@ -33,10 +39,12 @@ impl Game  {
         });
 
         self.snake.render(&mut self.gl, args);
+        self.food.render(&mut self.gl, args);
     }
 
     fn update(&mut self) {
         self.snake.update();
+        self.food.update();
     }
 
     fn pressed(&mut self, btn: &Button) {
@@ -64,9 +72,9 @@ impl Snake {
         let squares: Vec<graphics::types::Rectangle> = self.body
             .iter()
             .map(|&(x, y)| { graphics::rectangle::square(
-                (x * 20) as f64,
-                (y * 20_) as f64,
-                20_f64)
+                (x * (SNAKE_SIZE as i32)) as f64,
+                (y * (SNAKE_SIZE as i32)) as f64,
+                SNAKE_SIZE as f64)
         })
         .collect();
         
@@ -94,12 +102,63 @@ impl Snake {
     }
 }
 
+fn generate_initial_random_position() -> (f64, f64) {
+    let mut rng = rand::thread_rng();
+
+    // Calculate the number of rows and columns in the grid
+    let num_rows = WINDOW_HEIGHT / SNAKE_SIZE;
+    let num_cols = WINDOW_WIDTH / SNAKE_SIZE;
+
+    // Generate random row and column indices
+    let row_index = rng.gen_range(0..num_rows);
+    let col_index = rng.gen_range(0..num_cols);
+
+    // Calculate the actual position by multiplying the indices with the square size
+    let x = col_index * SNAKE_SIZE;
+    let y = row_index * SNAKE_SIZE;
+
+    (x as f64, y as f64)
+}
+
+struct Food {
+    x_pos: f64,
+    y_pos: f64,
+    size: f64
+}
+
+impl Food {
+    fn new(size: f64) -> Food {
+        let (x_pos, y_pos) = generate_initial_random_position();
+        Food {
+            x_pos,
+            y_pos,
+            size
+        }
+    }
+
+    fn render(&self,  gl: &mut GlGraphics,  args: &RenderArgs) {
+        let red: [f32; 4] = [1.0, 0.0, 0.0, 1.0];
+
+        let square: graphics::types::Rectangle = graphics::rectangle::square(self.x_pos, self.y_pos, self.size);
+        
+        gl.draw(args.viewport(), |c, gl| {
+            let transform = c.transform;
+
+            graphics::rectangle(red, square, transform, gl);
+        });
+    }
+
+    fn update(&mut self) {
+        // self.x_pos += 1.0 * SNAKE_SIZE as f64;
+    }
+}
+
 fn main() {
     let opengl = OpenGL::V3_2;
 
     let mut window: GlutinWindow = WindowSettings::new(
         "Snake Game",
-        [640, 480]
+        [WINDOW_WIDTH, WINDOW_HEIGHT]
     ).graphics_api(opengl)
         .exit_on_esc(true)
         .build()
@@ -110,7 +169,8 @@ fn main() {
         snake: Snake {
             body: LinkedList::from_iter((vec![(0, 0), (0, 1), (1,1)]).into_iter()),  
             direction: Direction::Right
-        }
+        },
+        food: Food::new(SNAKE_SIZE as f64)
     };
 
     let mut events = Events::new(EventSettings::new()).ups(8);
