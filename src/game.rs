@@ -17,9 +17,9 @@ pub enum Direction {
 }
 
 pub struct Game {
-    pub gl: GlGraphics,     // OpenGL drawing backend.
-    pub snake: Snake,       // Snake object
-    pub food: Food,         // Food object
+    pub gl: GlGraphics,
+    pub snake: Snake,
+    pub food: Food,
     pub game_over: bool,
     pub points: u64,
     pub increase_speed: bool
@@ -38,7 +38,7 @@ impl Game  {
     }
 
     fn check_snake_food_collision(&self) -> bool {
-        let snake_head = self.snake.body.front().unwrap();
+        let snake_head = self.snake.body.first().unwrap();
         (self.food.x_pos / (self.food.size as f64), self.food.y_pos / (self.food.size as f64)) == (snake_head.0 as f64, snake_head.1 as f64)
     }
 

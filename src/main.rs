@@ -16,8 +16,6 @@ use piston::input::*;
 use glutin_window::GlutinWindow;
 use opengl_graphics::{GlGraphics, OpenGL};
 
-use std::collections::LinkedList;
-
 const SNAKE_SIZE: u32  = 20;
 const WINDOW_WIDTH:  u32 = 800;
 const WINDOW_HEIGHT: u32 = 600;
@@ -39,7 +37,7 @@ fn main() {
     let mut game = game::Game {
         gl: GlGraphics::new(opengl),
         snake: snake::Snake {
-            body: LinkedList::from_iter((vec![(0, 0), (0, 1), (1,1)]).into_iter()),  
+            body: vec![(0, 0), (0, 1), (1,1)],  
             direction: Direction::Right,
             window_size: (WINDOW_WIDTH, WINDOW_HEIGHT),
             snake_size: SNAKE_SIZE

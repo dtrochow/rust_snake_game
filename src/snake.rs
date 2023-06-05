@@ -1,13 +1,10 @@
 use crate::game::Direction;
-use crate::utils::penultimate_element;
 
 use opengl_graphics::GlGraphics;
-use std::collections::LinkedList;
 use piston::input::RenderArgs;
-use std::borrow::Borrow;
 
 pub struct Snake {
-    pub body: LinkedList<(i32, i32)>,
+    pub body: Vec<(i32, i32)>,
     pub direction: Direction,
     pub window_size: (u32, u32),
     pub snake_size: u32
@@ -35,7 +32,7 @@ impl Snake {
     }
 
     pub fn update(&mut self) {
-        let mut new_head = (*self.body.front().expect("Snake has no body")).clone();
+        let mut new_head = *self.body.first().clone().unwrap();
 
         let window_width: u32 =  self.window_size.0;
         let window_height: u32 =  self.window_size.1;
@@ -76,17 +73,16 @@ impl Snake {
             }
         }
 
-        self.body.push_front(new_head);
-
-        self.body.pop_back().unwrap();
+        self.body.insert(0, new_head);
+        self.body.pop().unwrap();
     }
 
     pub fn grow(&mut self) {
-        let last_tail_segment = self.body.back().unwrap().clone();
-        let penultimate_tail_segment = penultimate_element(self.body.borrow()).unwrap().clone();
+        let last_tail_segment = self.body.last().unwrap().clone();
+        let penultimate_tail_segment = self.body.get(self.body.len() - 2).unwrap().clone();
 
         let grow_segment = (2 * last_tail_segment.0 - penultimate_tail_segment.0, 2 * last_tail_segment.1 - penultimate_tail_segment.1);
 
-        self.body.push_back(grow_segment);
+        self.body.push(grow_segment);
     }
 }
