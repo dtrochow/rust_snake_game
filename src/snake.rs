@@ -37,10 +37,10 @@ impl Snake {
         let window_width: u32 =  self.window_size.0;
         let window_height: u32 =  self.window_size.1;
 
-        let right_edge =  (window_width / self.snake_size) as i32;
+        let right_edge =  ((window_width / self.snake_size) - 1 )as i32;
         let left_edge = 0;
         let top_edge = 0;
-        let bottom_edge = (window_height / self.snake_size) as i32;
+        let bottom_edge = ((window_height / self.snake_size) - 1) as i32;
 
         match self.direction {
             Direction::Left => {
